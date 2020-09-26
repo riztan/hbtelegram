@@ -4,8 +4,8 @@
 
 #include "tpy_hb.ch"
 
-#define BOT_TOKEN "1089870519:AAEocjor1S_wLE6ALdsulOX9x9NRYA0LP-o"
-#define BOT_NAME  "DoctorBlueBot"
+#define BOT_TOKEN "YOUR_BOT_TOKEN_HERE"
+#define BOT_NAME  "YOUR_BOT_NAME_HERE"
 
 procedure main()
 
