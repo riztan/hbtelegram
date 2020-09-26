@@ -1,0 +1,16 @@
+hbcurl.hbc 
+
+-hblib
+-inc
+
+-o${hb_name}
+
+-w3 -es2
+
+-D__BIN__
+
+${hb_name}.hbx
+
+tlgrm_class.prg
+tpublic.prg
+

@@ -1,0 +1,8 @@
+description=Telegram (CURL)
+
+incpaths=.
+
+#headers=${hb_name}.ch
+#headers=tpy_hb.ch
+
+
