@@ -1,0 +1,7 @@
+/**
+ *   TOKEN OF TELEGRAM BOT
+ */
+
+#define BOT_TOKEN "YOUR_BOT_TOKEN"
+#define BOT_NAME  "YOUR_BOT_NAME"
+
