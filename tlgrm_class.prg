@@ -1028,7 +1028,7 @@ METHOD SetCommand( cCommand, bAction, ... ) CLASS TLGRMBOT
       return .f.
    endif
 
-tracelog "Incorporando comando ", cCommand //, hb_eol(), "Contenido", cAction 
+tracelog "Incorporating command  ", cCommand 
    hb_hSet( ::hCommands, cCommand, bAction, ... )
 tracelog hb_valtoexp(::hCommands)
 RETURN .t.
@@ -1144,7 +1144,7 @@ CLASS TLGRM_UPDATES
    METHOD Eof()         INLINE ::lEof
 
    METHOD Current( nPos ) 
-   METHOD Values()        INLINE hb_hKeys( ::oUpdate:hVars )
+   METHOD Values()      INLINE hb_hKeys( ::oUpdate:hVars )
    METHOD Next( nMove ) 
    METHOD Skip( nPos )  INLINE ::Next( nPos )
 
@@ -1472,7 +1472,7 @@ METHOD Resume() CLASS TLGRM_UPDATE
                                       cLastName +;
                                       iif( !Empty(cUserName),cUserName+hb_eol(),+"")
 //      cResume += "Fecha: "+DTOC( NToT( oMsg:date ) ) + hb_eol()
-      cResume += "Texto: "+::callback_query:data
+      cResume += "Text: "+::callback_query:data
 
    Case ::type = "message"
       oMsg := ::message
@@ -1489,7 +1489,7 @@ METHOD Resume() CLASS TLGRM_UPDATE
                                       iif( !Empty(cUserName),cUserName+hb_eol(),+"")
 //      cResume += "Fecha: "+DTOC( NToT( oMsg:date ) ) + hb_eol()
       if oMsg:IsDef( "text" )
-         cResume += "Texto: " + oMsg:text
+         cResume += "Text: " + oMsg:text
       endif
       
 
