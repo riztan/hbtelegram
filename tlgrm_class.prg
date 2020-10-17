@@ -331,6 +331,8 @@ METHOD sendMessage( uChatId, cText,  oMsg, hOthers ) CLASS TLGRMBOT
    if VALTYPE(uChatId) = "C" ; uChatId := ALLTRIM(uChatId) ; endif
    if empty( cText ) ; return "" ; endif
 
+   ::sendChatAction( uChatId, "typing" )
+
    hParams := Hash()
    //hParams["&"] := ""
    
@@ -503,6 +505,8 @@ METHOD sendVideo( uChatId, cCaption, cImagePath, oMsg, hOptionals ) CLASS TLGRMB
    if VALTYPE(uChatId) = "C" ; uChatId := ALLTRIM(uChatId) ; endif
    if empty( cCaption ) ; return "" ; endif
 
+   ::sendChatAction( uChatId, "upload_video" )
+
    hParams := Hash()
    
    if hb_IsObject( oMsg )
@@ -541,6 +545,8 @@ METHOD sendPhoto( uChatId, cCaption, cImagePath, oMsg, hOptionals ) CLASS TLGRMB
 
    if VALTYPE(uChatId) = "C" ; uChatId := ALLTRIM(uChatId) ; endif
    if empty( cCaption ) ; return "" ; endif
+
+   ::sendChatAction( uChatId, "upload_photo" )
 
    hParams := Hash()
    
@@ -624,6 +630,8 @@ METHOD sendVoice( uChatId, cCaption, cVoice, hOptionals, hOthers )  CLASS TLGRMB
       tracelog "No reference to the content of the voice message has been indicated."
       return .f.
    endif
+
+   ::sendChatAction( uChatId, "record_audio" )
 
    hVoice["chat_id" ] := uChatId
    hVoice["caption"]  := iif( !hb_strIsUTF8(cCaption), hb_strToUtf8(cCaption), cCaption )
@@ -984,6 +992,7 @@ tracelog time()+". Cycle counter...", nCont
 
 
    hTgm := hb_jsonDecode( cResp )
+
    curl_easy_reset( ::pCurl )
 
    curl_easy_cleanup( ::pCURL )
@@ -992,7 +1001,7 @@ tracelog time()+". Cycle counter...", nCont
    ::lRunning := .f.
 
    /*Manipulate the possible error that can throw cURL*/
-   if Empty( hTgm )
+   if !hb_isHash(hTgm) .or. Empty( hTgm )
       cError :=  "No answer, empty container."
       tracelog cError
       return NIL
@@ -1003,7 +1012,8 @@ tracelog time()+". Cycle counter...", nCont
       tracelog cError
    endif
 
-   if !Empty( hTgm["result"] )
+   //tracelog hb_valtoexp(hTgm)
+   if hb_hHasKey( hTgm, "result" ) .and. !Empty( hTgm["result"] )
       tracelog "Update: "+hb_eol()+cResp
    endif
 RETURN hTgm 
