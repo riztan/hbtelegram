@@ -54,6 +54,8 @@
    #include "tpy_class.ch"
 #endif
 
+#define __CHATID( uChatId )              iif( HB_ISSTRING( uChatId ), Val( uChatId ), uChatId )
+
 
 /** Utilizado para generar el hash de parametros definitivos en un metodo.
  */
@@ -172,6 +174,7 @@ CLASS tlgrmBot
 
    METHOD sendMediaGroup( uChatId, aMedia, cText, lDisableNotification, nReplyToMessageId )
 
+   METHOD sendAnimation( uChatId, cAnimationPath, oMsg, hOptionals )
    METHOD sendVideo( uChatId, cCaption, cImagePath, oMsg, hOptionals )
    METHOD sendPhoto( uChatId, cCaption, cImagePath, oMsg, hOptionals )
    METHOD SendPoll( uChatId, cQuestion, aOptions, hOptionals, hOthers )
@@ -183,7 +186,7 @@ CLASS tlgrmBot
    METHOD sendYesNo( uChatId, cText, oMsg, ... )
 
    METHOD inlineChoice( uChatId, cText, aOptions, oMsg, ... ) 
-//   METHOD KeyboardChoice( hItems )   (POR HACER #ToDo )
+   METHOD KeyboardChoice( uChatId, cText, aChoices, lResizeKeyboard, lOneTime )   
 
    METHOD addQuestion( uChatID, cIdQuestion )  INLINE hb_hSet( ::hOpenQuestion, uChatID, cIdQuestion )
 
@@ -499,6 +502,42 @@ RETURN ::Execute( "sendMediaGroup", hParams )
 /*
  *
  */
+METHOD sendAnimation( uChatId, cAnimationPath, oMsg, hOptionals ) CLASS TLGRMBOT
+   local hTgm, hParams
+
+   if VALTYPE(uChatId) = "C" ; uChatId := ALLTRIM(uChatId) ; endif
+
+   ::sendChatAction( uChatId, "upload_video" )
+
+   hParams := Hash()
+   
+   if hb_IsObject( oMsg )
+      hParams["reply_to_message_id"] := oMsg:id
+   endif
+
+   hParams["chat_id"] := uChatId
+
+   hParams["parse_mode"] := "HTML" //"Markdown"
+   hParams["animation"]  := cAnimationPath
+
+   if hb_isHash( hOptionals ) .and. !Empty( hOptionals )
+      HEVAL( hOptionals, {|key,value |  hb_hSet( hParams, key, value ) } )
+tracelog  hb_valtoexp(hOptionals)
+   endif
+
+   hTgm := ::Execute( "sendAnimation", hParams )
+   
+   if !hb_ISHash( hTgm )
+      RETURN .F.
+   endif
+
+RETURN .t.
+
+
+
+/*
+ *
+ */
 METHOD sendVideo( uChatId, cCaption, cImagePath, oMsg, hOptionals ) CLASS TLGRMBOT
    local hTgm, hParams//, uItem, hResult
 
@@ -642,7 +681,10 @@ METHOD sendVoice( uChatId, cCaption, cVoice, hOptionals, hOthers )  CLASS TLGRMB
    CheckParam( hOptionals, @hVoice, "disable_notification" )
    CheckParam( hOptionals, @hVoice, "reply_to_message_id" )
 
-   
+   if !hb_hHasKey( hVoice, "parse_mode" )   
+      hVoice["parse_mode"] := "HTML" //"Markdown"
+   endif
+
    if !Empty( hOthers )
       hVoice["reply_markup"] := hOthers
    endif
@@ -714,8 +756,29 @@ METHOD InlineChoice( uChatId, cText, aOptions, oMsg, ... ) CLASS TLGRMBOT
    tracelog hb_jsonEncode(hKBtn)
  
    if !hb_StrIsUTF8( cText ) ; cText := hb_StrToUTF8(cText) ; endif
-   hResult := ::SendMessage( uChatId, cText, oMsg, hb_jsonEncode(hKBtn), ... )
+   hResult := ::SendMessage( uChatId, cText, oMsg, hKBtn, ... )
 RETURN hresult
+
+
+
+/**
+ *
+ */
+METHOD keyboardChoice( uChatId, cText, aChoices, lResizeKeyboard, lOneTime )
+   LOCAL hParams := {=>}
+   LOCAL hKeyboard := hb_jsonDecode( hb_jsonEncode( { aChoices } ) )
+   
+   hb_default( @lResizeKeyboard, .T. )
+   hb_default( @lOneTime, .T. )
+   
+   hParams[ "chat_id" ] := __CHATID( uChatId )
+   hParams[ "text" ] := cText 
+   hParams[ "parse_mode" ] := "MARKDOWN" 
+   hParams[ "reply_markup" ] := { "keyboard"          => hKeyboard, ;
+                                  "resize_keyboard"   => lResizeKeyboard, ;
+                                  "one_time_keyboard" => lOneTime }
+   //
+   RETURN HB_ISHASH( ::execute( "sendMessage", hParams ) )
 
 
 
@@ -1052,7 +1115,7 @@ METHOD Reply() CLASS TLGRMBOT
    local oUpdate := ::oUpdates:Current()
    local aTokens := oUpdate:tokens
    //local lCallBack := .f.
-   local oFrom, oMsg, cCommand, oErr, cText
+   local oFrom, oMsg, cCommand /*, oErr, cText*/
 
    //tracelog "tokens", hb_valtoexp( aTokens ) //oUpdate:tokens )
 
