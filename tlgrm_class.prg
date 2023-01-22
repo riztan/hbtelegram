@@ -326,8 +326,8 @@ RETURN .t.
  *
  */
 METHOD sendMessage( uChatId, cText,  oMsg, hOthers ) CLASS TLGRMBOT
-   local hTgm, hParams//, uItem, hResult
-   //local oRes := TPublic():New()
+
+   local hTgm, hParams
 
    hb_default( hOthers, Hash() )
 
@@ -1115,7 +1115,7 @@ METHOD Reply() CLASS TLGRMBOT
    local oUpdate := ::oUpdates:Current()
    local aTokens := oUpdate:tokens
    //local lCallBack := .f.
-   local oFrom, oMsg, cCommand /*, oErr, cText*/
+   local oFrom, oMsg, cCommand, oErr, cText
 
    //tracelog "tokens", hb_valtoexp( aTokens ) //oUpdate:tokens )
 
@@ -1157,7 +1157,7 @@ METHOD Reply() CLASS TLGRMBOT
             cText += "<b>Command: </b>"    +cCommand + hb_eol()
             cText += "<b>From: </b> "      +oFrom:first_name+hb_eol()
             cText += "<b>Update: </b>"     +hb_eol()+hb_valtoexp(oUpdate)+hb_eol()+hb_eol()
-            //::sendMessage("330534557", cText )
+
             tracelog cText
             hb_memoWrit( "exit.log", cText )
          END SEQUENCE
